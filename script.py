@@ -1,12 +1,39 @@
 #!/usr/bin/python3
-import getpass
 import json
-import pandas as pd
 import re
 import smtplib
+import subprocess
 import sys
 
-from claseMensaje import Mensaje
+list_package = []
+
+try:
+    import getpass#
+except ImportError:
+    print("WARNING: The package getpass is not installed.")
+    list_package.append("getpass")    
+try:
+    import pandas as pd#
+except ImportError:
+    print("WARNING: The package pandas is not installed.")
+    list_package.append("pandas")
+
+if len(list_package):
+    flag = input("Do you want install the following packages\n\t-"+"\n\t-".join(list_package) +"\n( [y] / n ):")
+    if flag == "" or flag.upper() == "Y":
+        if sys.platform == 'win32':
+            subprocess.run("pip install " + " ".join(list_package) , stdout=subprocess.PIPE, universal_newlines=True)        
+        elif sys.platform == 'linux':
+            subprocess.run("sudo pip3 install " + " ".join(list_package), stdout=subprocess.PIPE, universal_newlines=True)
+        else :
+            print("WARNING: For the %s platform you must install manualy the packages."%(sys.platform))
+            sys.exit(1)
+    elif flag.upper() == "N":
+        sys.exit(1)
+    else:
+        sys.exit(1)
+
+import src.claseMensaje as msg
 
 # Regular Expression
 email_patron = re.compile(r'\b[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,6}\b')
@@ -52,7 +79,7 @@ with smtplib.SMTP(config["host"][config["host_opc"]], config["port"]) as server:
     
     print("\n***** Email *****")
     # Message class
-    new_message = Mensaje(config["email"])
+    new_message = msg.Mensaje(config["email"])
 
     # To
     print("Importing from excel's file the emails.")
